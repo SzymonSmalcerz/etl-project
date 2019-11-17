@@ -76,6 +76,17 @@ app.get("/state", (req, res) => {
   });
 });
 
+app.post("/dropDB", async (req, res) => {
+  try {
+    await movieKeyFunctions.dropMovieKeyData();
+    res.json({
+      message : "Success"
+    });
+  } catch(e) {
+    return400(res, "Unexpected error: " + e);
+  }
+});
+
 app.get("*", (req,res) => {
   res.status(404).send("Not found - you are lost");
 });

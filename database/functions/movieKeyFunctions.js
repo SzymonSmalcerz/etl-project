@@ -26,6 +26,11 @@ async function transform (movieKey) {
   }
 };
 
+async function dropMovieKeyData() {
+  await MovieKey.deleteMany();
+}
+
 module.exports = {
-  transform
+  transform,
+  dropMovieKeyData
 }
