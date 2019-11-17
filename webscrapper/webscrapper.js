@@ -3,25 +3,43 @@ var request = require("request");
 var baseFilmwebURL = "https://www.filmweb.pl";
 var fileHandler = require("../files/fileHandler");
 
-function getMovieHrefs(movieKey, errorCallback, successCallback) {
-  request(baseFilmwebURL + "/search?q=" + encodeURI(movieKey), (error, response, body) => {
-    var titleElement = parse(body).querySelectorAll('.filmPreview__title');
-    var hrefs = [];
-    if(titleElement == null) {
-      return errorCallback();
-    }
-    titleElement.forEach(element => {
-      hrefs.push(element.parentNode.rawAttrs.split(" ").filter(e => e.startsWith('href'))[0]);
-    });
-    hrefs = hrefs.map(href => href.split("").slice(6,-1).join(""));
-    if(hrefs.length == 0) {
-      return errorCallback();
-    }
-    successCallback(hrefs);
-  });
+async function getMovieHrefs(movieKeys, errorCallback, successCallback) {
+  var numOfExtrElements = 0;
+  for(var i=0; i<movieKeys.length; i++) {
+    var movieKey = movieKeys[i];
+    try {
+      await new Promise(async (resolve, reject) => {
+        request(baseFilmwebURL + "/search?q=" + encodeURI(movieKey), async (error, response, body) => {
+          if(error != null) {
+            retject();
+          }
+          var titleElement = parse(body).querySelectorAll('.filmPreview__title');
+          var hrefs = [];
+          if(titleElement == null) {
+            return errorCallback(movieKey);
+          };
+          titleElement.forEach(element => {
+            hrefs.push(element.parentNode.rawAttrs.split(" ").filter(e => e.startsWith('href'))[0]);
+          });
+          hrefs = hrefs.map(href => href.split("").slice(6,-1).join(""));
+          if(hrefs.length == 0) {
+            return errorCallback(movieKey);
+          }
+          await fetchAndSaveInfoFromHrefs(hrefs, movieKey, () => {
+            errorCallback(movieKey);
+          });
+          numOfExtrElements += 1;
+          resolve();
+        });
+      });
+    } catch(e) {
+      return errorCallback(e);
+    };
+  };
+  successCallback(numOfExtrElements);
 };
 
-function fetchAndSaveInfoFromHrefs(hrefs, movieKey, errorCallback, successCallback) {
+async function fetchAndSaveInfoFromHrefs(hrefs, movieKey, errorCallback) {
   var hrefLenghts = 0;
   var toSaveData = [];
   hrefs.forEach(async href => {
@@ -35,11 +53,9 @@ function fetchAndSaveInfoFromHrefs(hrefs, movieKey, errorCallback, successCallba
       }).querySelector('[data-type="setfilm"]').firstChild.rawText.split(','), href))
       if(hrefLenghts >= hrefs.length) {
         await createAndSaveMovieData(toSaveData, movieKey);
-        successCallback(body);
       }
     });
   });
-
 };
 
 function createAndSaveMovieData(data, movieKey) {

@@ -7,7 +7,7 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var lastKeyEntered;
+var lastKeysEntered;
 var currentState = "L";
 var nextState = {
   "E" : "T",
@@ -23,18 +23,14 @@ function return400(res, errorMsg) {
 
 app.post("/e", async (req, res) => {
   if(currentState == "E" || currentState == "L") {
-    if(req.body != null && req.body.movieKey != null) {
-      webscrapper.getMovieHrefs(req.body.movieKey, () => {
-        return400(res, "Movies for this key not found");
-      }, (hrefs) => {
-        webscrapper.fetchAndSaveInfoFromHrefs(hrefs, req.body.movieKey, (e) => {
-          return400(res, "Unexpected Error contact administration: " + e);
-        }, (body) => {
-          currentState = "E";
-          lastKeyEntered = req.body.movieKey;
-          res.status(200).json({
-            message : "Success"
-          });
+    if(req.body != null && req.body.movieKeys != null) {
+      webscrapper.getMovieHrefs(req.body.movieKeys, (movieKey) => {
+        return400(res, "Movies for key " + movieKey + " not found");
+      }, (numOfExtrElements) => {
+        currentState = "E";
+        lastKeysEntered = req.body.movieKeys;
+        res.status(200).json({
+          message : "Success, num of extracted elements: " + numOfExtrElements
         });
       });
     } else {
@@ -47,13 +43,13 @@ app.post("/e", async (req, res) => {
 
 app.post("/t", async(req, res) => {
   if(currentState == "E") {
-    var error = await movieKeyFunctions.transform(lastKeyEntered);
-    if(error) {
-      return return400(res, "Unexpected error: " + error);
+    var result = await movieKeyFunctions.transform(lastKeysEntered);
+    if(result.error) {
+      return return400(res, "Unexpected error: " + result.error);
     }
     currentState = "T";
     res.json({
-      message : "Success"
+      message : "Success, number of transformed elements: " + result.numOfTransformedElements
     });
   } else {
     return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
@@ -62,8 +58,14 @@ app.post("/t", async(req, res) => {
 
 app.post("/l", async(req, res) => {
   if(currentState == "T") {
+    var result = await movieKeyFunctions.load(lastKeysEntered);
+    if(result.error) {
+      return return400(res, "Unexpected error: " + result.error);
+    }
     currentState = "L";
-    res.send("mock");
+    res.json({
+      message : "Success, number of loadedElements: " + result.numOfLoadedElements
+    });
   } else {
     return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
   }
@@ -72,7 +74,7 @@ app.post("/l", async(req, res) => {
 app.get("/state", (req, res) => {
   res.json({
     currentState,
-    lastKeyEntered
+    lastKeysEntered
   });
 });
 
@@ -103,7 +105,7 @@ app.get("/data/:movieKey", async (req,res) => {
   try {
     var data = await movieKeyFunctions.getData(req.params.movieKey);
     if(data == null) {
-      return return400(res, "Move data for key " + req.params.movieKey + " not found");
+      return return400(res, "Movie data for key " + req.params.movieKey + " not found");
     };
     res.json({
       data,
@@ -116,14 +118,14 @@ app.get("/data/:movieKey", async (req,res) => {
 
 app.get("/csv", async (req, res) => {
   var csv = await movieKeyFunctions.saveToCSV();
-  res.setHeader('Content-disposition', 'attachment; filename=testing.csv');
+  res.setHeader('Content-disposition', 'attachment; filename=allMoviesData.csv');
   res.set('Content-Type', 'text/csv');
   res.status(200).send(csv);
 });
 
 app.get("/csv/:movieKey", async (req, res) => {
   var csv = await movieKeyFunctions.saveToCSV(req.params.movieKey);
-  res.setHeader('Content-disposition', 'attachment; filename=testing.csv');
+  res.setHeader('Content-disposition', 'attachment; filename=' + req.params.movieKey + 'Data.csv');
   res.set('Content-Type', 'text/csv');
   res.status(200).send(csv);
 });

@@ -1,29 +1,55 @@
 const MovieKey = require("../models/MovieKeyData");
 var fileHandler = require("../../files/fileHandler");
 
-async function transform (movieKey) {
-  try {
-    var data = fileHandler.loadData(movieKey);
+async function transform (movieKeys) {
+  var numOfTransformedElements = 0;
+  for(var i=0; i<movieKeys.length; i++) {
+    var data = fileHandler.loadData(movieKeys[i]);
     if(data != null) {
-      await MovieKey.deleteOne({key : movieKey});
-      var movieData = new MovieKey(data);
-      if(movieData.years != null) {
-        movieData.averageYear = movieData.years.reduce((x,y) => x+y ,0)/movieData.years.length;
+      if(data.years != null) {
+        data.averageYear = data.years.reduce((x,y) => x+y ,0)/data.years.length;
       }
-      if(movieData.ratingsCount != null) {
-        movieData.averageRatingsCount = movieData.ratingsCount.reduce((x,y) => x+y ,0)/movieData.ratingsCount.length;
+      if(data.ratingsCount != null) {
+        data.averageRatingsCount = data.ratingsCount.reduce((x,y) => x+y ,0)/data.ratingsCount.length;
       }
-      if(movieData.ratings != null) {
-        movieData.averageRating = movieData.ratings.reduce((x,y) => x+y ,0)/movieData.ratings.length;
-        console.log(movieData.averageRating);
-      }
-      await movieData.save();
-      fileHandler.deleteData(movieKey);
+      if(data.ratings != null) {
+        data.averageRating = data.ratings.reduce((x,y) => x+y ,0)/data.ratings.length;
+      };
+      fileHandler.saveData(data);
+      numOfTransformedElements += 1;
     } else {
-      return "file for this movie key not found, contact administration";
-    }
-  } catch (e) {
-    return e;
+      return {
+        error : "file for this movie key not found, contact administration"
+      };
+    };
+  };
+  return {
+    numOfTransformedElements
+  };
+};
+
+async function load(movieKeys) {
+  var numOfLoadedElements = 0;
+  for(var i=0; i<movieKeys.length; i++) {
+    var data = fileHandler.loadData(movieKeys[i]);
+    if(data != null) {
+      try {
+        await MovieKey.deleteOne({key : movieKeys[i]});
+        var movieData = new MovieKey(data);
+        await movieData.save();
+        fileHandler.deleteData(movieKeys[i]);
+        numOfLoadedElements += 1;
+      } catch(e) {
+        return e;
+      }
+    } else {
+      return {
+        error : "file for this movie key not found, contact administration"
+      };
+    };
+  };
+  return {
+    numOfLoadedElements
   }
 };
 
@@ -45,12 +71,13 @@ async function saveToCSV(movieKey) {
   var data = await getData(movieKey);
   fileHandler.saveToCsv({
     items : data
-  }, "TEST");
-  return fileHandler.getCSV("TEST");
+  }, "moviesData");
+  return fileHandler.getCSV("moviesData");
 }
 
 module.exports = {
   transform,
+  load,
   dropMovieKeyData,
   getData,
   saveToCSV
