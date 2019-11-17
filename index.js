@@ -87,6 +87,33 @@ app.post("/dropDB", async (req, res) => {
   }
 });
 
+app.get("/data", async (req,res) => {
+  try {
+    var data = await movieKeyFunctions.getData();
+    res.json({
+      data,
+      message : "Success"
+    });
+  } catch(e) {
+    return400(res, "Unexpected error: " + e);
+  }
+});
+
+app.get("/data/:movieKey", async (req,res) => {
+  try {
+    var data = await movieKeyFunctions.getData(req.params.movieKey);
+    if(data == null) {
+      return return400(res, "Move data for key " + req.params.movieKey + " not found");
+    };
+    res.json({
+      data,
+      message : "Success"
+    });
+  } catch(e) {
+    return400(res, "Unexpected error: " + e);
+  }
+});
+
 app.get("*", (req,res) => {
   res.status(404).send("Not found - you are lost");
 });

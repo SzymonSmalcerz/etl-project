@@ -5,6 +5,7 @@ async function transform (movieKey) {
   try {
     var data = fileHandler.loadData(movieKey);
     if(data != null) {
+      await MovieKey.deleteOne({key : movieKey});
       var movieData = new MovieKey(data);
       if(movieData.years != null) {
         movieData.averageYear = movieData.years.reduce((x,y) => x+y ,0)/movieData.years.length;
@@ -30,7 +31,18 @@ async function dropMovieKeyData() {
   await MovieKey.deleteMany();
 }
 
+async function getData(movieKey) {
+  if(movieKey == null) {
+    return await MovieKey.find();
+  } else {
+    return await MovieKey.findOne({
+      key : movieKey
+    });
+  }
+}
+
 module.exports = {
   transform,
-  dropMovieKeyData
-}
+  dropMovieKeyData,
+  getData
+};
