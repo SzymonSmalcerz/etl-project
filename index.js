@@ -2,10 +2,25 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var webscrapper = require("./webscrapper/webscrapper");
 var movieKeyFunctions = require("./database/functions/movieKeyFunctions");
+const hbs = require('hbs');
+const path = require('path');
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Define paths for Express config
+const publicDirectoryPath = path.join(__dirname, '/public')
+const viewsPath = path.join(__dirname, '/templates/views')
+const partialsPath = path.join(__dirname, '/templates/partials')
+
+// Setup handlebars engine and views location
+app.set('view engine', 'hbs')
+app.set('views', viewsPath)
+hbs.registerPartials(partialsPath)
+
+// Setup static directory to serve
+app.use(express.static(publicDirectoryPath))
 
 var lastKeysEntered;
 var currentState = "L";
@@ -92,9 +107,8 @@ app.post("/dropDB", async (req, res) => {
 app.get("/data", async (req,res) => {
   try {
     var data = await movieKeyFunctions.getData();
-    res.json({
-      data,
-      message : "Success"
+    res.render('data', {
+        data : JSON.stringify(data)
     });
   } catch(e) {
     return400(res, "Unexpected error: " + e);
@@ -107,9 +121,8 @@ app.get("/data/:movieKey", async (req,res) => {
     if(data == null) {
       return return400(res, "Movie data for key " + req.params.movieKey + " not found");
     };
-    res.json({
-      data,
-      message : "Success"
+    res.render('data', {
+        data : JSON.stringify(data, null, 2).toString()
     });
   } catch(e) {
     return400(res, "Unexpected error: " + e);
@@ -131,7 +144,9 @@ app.get("/csv/:movieKey", async (req, res) => {
 });
 
 app.get("*", (req,res) => {
-  res.status(404).send("Not found - you are lost");
+  res.render('404', {
+      error: 'You are lost.'
+  })
 });
 
 const port = process.env.PORT || 3000;
