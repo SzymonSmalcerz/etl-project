@@ -114,6 +114,20 @@ app.get("/data/:movieKey", async (req,res) => {
   }
 });
 
+app.get("/csv", async (req, res) => {
+  var csv = await movieKeyFunctions.saveToCSV();
+  res.setHeader('Content-disposition', 'attachment; filename=testing.csv');
+  res.set('Content-Type', 'text/csv');
+  res.status(200).send(csv);
+});
+
+app.get("/csv/:movieKey", async (req, res) => {
+  var csv = await movieKeyFunctions.saveToCSV(req.params.movieKey);
+  res.setHeader('Content-disposition', 'attachment; filename=testing.csv');
+  res.set('Content-Type', 'text/csv');
+  res.status(200).send(csv);
+});
+
 app.get("*", (req,res) => {
   res.status(404).send("Not found - you are lost");
 });

@@ -29,7 +29,7 @@ async function transform (movieKey) {
 
 async function dropMovieKeyData() {
   await MovieKey.deleteMany();
-}
+};
 
 async function getData(movieKey) {
   if(movieKey == null) {
@@ -39,10 +39,19 @@ async function getData(movieKey) {
       key : movieKey
     });
   }
+};
+
+async function saveToCSV(movieKey) {
+  var data = await getData(movieKey);
+  fileHandler.saveToCsv({
+    items : data
+  }, "TEST");
+  return fileHandler.getCSV("TEST");
 }
 
 module.exports = {
   transform,
   dropMovieKeyData,
-  getData
+  getData,
+  saveToCSV
 };
