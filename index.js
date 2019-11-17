@@ -6,6 +6,14 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+var lastKeyEntered;
+var currentState = "L";
+var nextState = {
+  "E" : "T",
+  "T" : "L",
+  "L" : "E"
+}
+
 function return400(res, errorMsg) {
   return res.status(400).json({
     "error" : errorMsg
@@ -13,21 +21,51 @@ function return400(res, errorMsg) {
 };
 
 app.post("/e", async (req, res) => {
-  if(req.body != null && req.body.movieKey != null) {
-    webscrapper.getMovieHrefs(req.body.movieKey, () => {
-      return400(res, "Movies for this key not found");
-    }, (hrefs) => {
-      webscrapper.fetchAndSaveInfoFromHrefs(hrefs, req.body.movieKey, (e) => {
-        return400(res, "Unexpected Error contact administration: " + e);
-      }, (body) => {
-        res.status(200).json({
-          message : "Success"
+  if(currentState == "E" || currentState == "L") {
+    if(req.body != null && req.body.movieKey != null) {
+      webscrapper.getMovieHrefs(req.body.movieKey, () => {
+        return400(res, "Movies for this key not found");
+      }, (hrefs) => {
+        webscrapper.fetchAndSaveInfoFromHrefs(hrefs, req.body.movieKey, (e) => {
+          return400(res, "Unexpected Error contact administration: " + e);
+        }, (body) => {
+          currentState = "E";
+          res.status(200).json({
+            message : "Success"
+          });
         });
       });
-    })
+    } else {
+      return return400(res, "You must provide non empty movie key");
+    }
   } else {
-    return return400(res, "You must provide non empty movie key");
+    return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
   }
+});
+
+app.post("/t", async(req, res) => {
+  if(currentState == "E") {
+    currentState = "T";
+    res.send("mock");
+  } else {
+    return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
+  }
+});
+
+app.post("/l", async(req, res) => {
+  if(currentState == "T") {
+    currentState = "L";
+    res.send("mock");
+  } else {
+    return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
+  }
+});
+
+app.get("/state", (req, res) => {
+  res.json({
+    currentState,
+    lastKeyEntered
+  });
 });
 
 app.get("*", (req,res) => {

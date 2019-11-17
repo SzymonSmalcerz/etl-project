@@ -52,7 +52,7 @@ async function createAndSaveMovieData(data, movieKey) {
   };
   for(var i=0; i<data.length; i++) {
     movieKeyJsonData.ratings.push(eval(data[i].rate));
-    movieKeyJsonData.ratingsCount.push(eval(data[i].rate));
+    movieKeyJsonData.ratingsCount.push(eval(data[i].ratingCount));
     movieKeyJsonData.years.push(eval(data[i].year));
     movieKeyJsonData.movieHrefs.push(data[i].href);
   };
