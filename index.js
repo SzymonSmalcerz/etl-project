@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var webscrapper = require("./webscrapper/webscrapper");
+var movieKeyFunctions = require("./database/functions/movieKeyFunctions");
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -30,6 +31,7 @@ app.post("/e", async (req, res) => {
           return400(res, "Unexpected Error contact administration: " + e);
         }, (body) => {
           currentState = "E";
+          lastKeyEntered = req.body.movieKey;
           res.status(200).json({
             message : "Success"
           });
@@ -45,8 +47,14 @@ app.post("/e", async (req, res) => {
 
 app.post("/t", async(req, res) => {
   if(currentState == "E") {
+    var error = await movieKeyFunctions.transform(lastKeyEntered);
+    if(error) {
+      return return400(res, "Unexpected error: " + error);
+    }
     currentState = "T";
-    res.send("mock");
+    res.json({
+      message : "Success"
+    });
   } else {
     return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
   }

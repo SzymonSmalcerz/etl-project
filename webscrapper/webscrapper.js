@@ -1,7 +1,7 @@
 var { parse } = require("node-html-parser");
 var request = require("request");
 var baseFilmwebURL = "https://www.filmweb.pl";
-var MovieKey = require("../database/models/MovieKeyData");
+var fileHandler = require("../files/fileHandler");
 
 function getMovieHrefs(movieKey, errorCallback, successCallback) {
   request(baseFilmwebURL + "/search?q=" + encodeURI(movieKey), (error, response, body) => {
@@ -42,7 +42,7 @@ function fetchAndSaveInfoFromHrefs(hrefs, movieKey, errorCallback, successCallba
 
 };
 
-async function createAndSaveMovieData(data, movieKey) {
+function createAndSaveMovieData(data, movieKey) {
   var movieKeyJsonData = {
     key : movieKey,
     ratings : [],
@@ -56,9 +56,7 @@ async function createAndSaveMovieData(data, movieKey) {
     movieKeyJsonData.years.push(eval(data[i].year));
     movieKeyJsonData.movieHrefs.push(data[i].href);
   };
-  console.log(data);
-  var movieKeyData = new MovieKey(movieKeyJsonData);
-  await movieKeyData.save();
+  fileHandler.saveData(movieKeyJsonData);
 }
 
 function parseInfo(info, href) {
