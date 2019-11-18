@@ -143,6 +143,10 @@ app.get("/csv/:movieKey", async (req, res) => {
   res.status(200).send(csv);
 });
 
+app.get("/", (req,res) => {
+  res.render('index');
+});
+
 app.get("*", (req,res) => {
   res.render('404', {
       error: 'You are lost.'
