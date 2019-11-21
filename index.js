@@ -31,7 +31,7 @@ var nextState = {
 }
 
 function return400(res, errorMsg) {
-  return res.status(400).json({
+  return res.status(200).json({
     "error" : errorMsg
   });
 };
@@ -40,7 +40,8 @@ app.post("/e", async (req, res) => {
   if(currentState == "E" || currentState == "L") {
     if(req.body != null && req.body.movieKeys != null) {
       webscrapper.getMovieHrefs(req.body.movieKeys, (movieKey) => {
-        return400(res, "Movies for key " + movieKey + " not found");
+        console.log("HEEERE");
+        return return400(res, "Movies for key " + movieKey + " not found");
       }, (numOfExtrElements) => {
         currentState = "E";
         lastKeysEntered = req.body.movieKeys;
@@ -67,7 +68,7 @@ app.post("/t", async(req, res) => {
       message : "Success, number of transformed elements: " + result.numOfTransformedElements
     });
   } else {
-    return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
+    return return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
   }
 });
 
@@ -82,7 +83,7 @@ app.post("/l", async(req, res) => {
       message : "Success, number of loadedElements: " + result.numOfLoadedElements
     });
   } else {
-    return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
+    return return400(res, "Non proper state for that call (N(E ... -> E) [ N >= 1 ] -> T -> L -> E -> ...)");
   }
 });
 

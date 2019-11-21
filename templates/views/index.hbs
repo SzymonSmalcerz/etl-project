@@ -4,33 +4,50 @@
       <title>Weather</title>
       {{>jsAndCss}}
   </head>
-
   <body>
-
-    <div class="container">
+    <div class="myContainer">
       {{>header}}
-      	<div class="row">
-      		<input type="hidden" name="count" value="1" />
+      <div class="message">
+        <p class="textWrapper">
+        </p>
+      </div>
+      <div class="container">
+        <div id="loading">
+          <img src="/img/loading.gif" alt="Italian Trulli">
+          <br>
+          <small>Application is loading, please wait</small>
+        </div>
+        <div class="row" id="extractContainer">
+          <input type="hidden" name="count" value="1" />
               <div class="control-group" id="fields">
-                  <label class="control-label" for="field1">Nice Multiple Form Fields</label>
-                  <div class="controls" id="profs">
-                      <form class="input-append">
-                          <div id="field">
-                            <input autocomplete="off" class="input" id="field1" name="prof1" type="text" placeholder="Type something" data-items="8"/>
-                            <button id="b1" class="btn add-more" type="button">+</button>
-                          </div>
-                      </form>
-                  <br>
-                  <button id="submit" class="btn" type="button">Extract</button>
-                  <small>Press + to add another movie key field and then extract data :)</small>
+                <label class="control-label" for="field1">Nice Multiple Form Fields</label>
+                <div class="controls" id="profs">
+                    <form class="input-append">
+                        <div id="field">
+                          <input autocomplete="off" class="input" id="field1" name="prof1" type="text" placeholder="Type something" data-items="8"/>
+                          <button id="b1" class="btn add-more" type="button">+</button>
+                        </div>
+                    </form>
+                    <br>
+                    <button id="extract" class="btn" type="button">Extract</button>
+                    <small>Press + to add another movie key field and then extract data :)</small>
                   </div>
               </div>
-      	</div>
+          </div>
+          <div class="row" id="transformContainer">
+            <h1>Transform data for movies with keys:</h1>
+            <p id="transformKeys"></p>
+            <button id="transform" class="btn" type="button">Transform data</button>
+          </div>
+          <div class="row" id="loadContainer">
+            <h1>Load data for movies with keys:</h1>
+            <p id="loadKeys"></p>
+            <button id="load" class="btn" type="button">LoadData</button>
+          </div>
+        </div>
         {{>footer}}
-      </div>
-
-
-      <script src="/main.js"></script>
+    </div>
+    <script src="/main.js"></script>
   </body>
 
 </html>

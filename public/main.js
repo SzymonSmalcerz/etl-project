@@ -13,7 +13,6 @@ $(document).ready(function() {
       $(addRemove).after(removeButton);
       $("#field" + next).attr('data-source',$(addto).attr('data-source'));
       $("#count").val(next);
-
           $('.remove-me').click(function(e){
               e.preventDefault();
               var fieldNum = this.id.charAt(this.id.length-1);
@@ -23,8 +22,8 @@ $(document).ready(function() {
           });
   });
 
-    $('#submit').click(function(e) {
-      $('.input-append').css("display", "none");
+    $('#extract').click(function(e) {
+      setLoadingGif();
       var b = [];
       for(var i=0;i<$('#field')[0].childNodes.length;i++) {
         if($('#field')[0].childNodes[i].value != null && $('#field')[0].childNodes[i].value.length > 0) {
@@ -33,15 +32,73 @@ $(document).ready(function() {
       };
       b = new Set(b);
       b = [...b];
-      console.log(b);
-       $.post("/e",{
-         movieKeys : b
-       },(data, status) => {
-         console.log(data);
-         console.log(status);
-       });
-      // alert("entered keys: " + b);
-      // alert("no more for now :C");
-
+      $.post("/e",{
+        movieKeys : b
+      },(data, status) => {
+      console.log(data);
+        showMessage(data);
+        fetchState();
+      });
     });
+
+    $('#transform').click(function(e) {
+      setLoadingGif();
+      $.post("/t",{},(data, status) => {
+      console.log(data);
+      showMessage(data);
+      fetchState();
+      });
+    });
+
+    $('#load').click(function(e) {
+      setLoadingGif();
+      $.post("/l",{},(data, status) => {
+      console.log(data);
+      showMessage(data);
+      fetchState();
+      });
+    });
+
+    function setLoadingGif() {
+        $('#extractContainer').css("display", "none");
+        $('#transformContainer').css("display", "none");
+        $('#loadContainer').css("display", "none");
+        $('#loading').css("display", "inline-block");
+    }
+
+    function showMessage(data) {
+      if(data.message != null) {
+        $('.textWrapper')[0].innerText = data.message;
+        $('.message').css("background-color", "rgba(0,200,0,150)");
+      } else if(data.error != null) {
+        $('.textWrapper')[0].innerText = data.error;
+        $('.message').css("background-color", "rgba(200,0,0,150)");
+      }
+      $('.message').css("display", "table");
+    }
+
+    $('.message').click(function(e) {
+      $('.message').css("display", "none");
+    });
+
+    function fetchState() {
+      $.ajax({
+          url : "/state",
+          dataType : "json"
+      })
+      .done(res => {
+        $('#loading').css("display", "none");
+        if(res.currentState == "L") {
+            $('#extractContainer').css("display", "inline-block");
+        } else if(res.currentState == "E") {
+            $('#transformContainer').css("display", "inline-block");
+            $('#transformKeys')[0].innerText = res.lastKeysEntered;
+        } else if(res.currentState == "T") {
+            $('#loadContainer').css("display", "inline-block");
+            $('#loadKeys')[0].innerText = res.lastKeysEntered;
+        }
+      });
+    };
+
+    fetchState()
 });

@@ -11,7 +11,7 @@ async function getMovieHrefs(movieKeys, errorCallback, successCallback) {
       await new Promise(async (resolve, reject) => {
         request(baseFilmwebURL + "/search?q=" + encodeURI(movieKey), async (error, response, body) => {
           if(error != null) {
-            retject();
+            reject();
           }
           var titleElement = parse(body).querySelectorAll('.filmPreview__title');
           var hrefs = [];
