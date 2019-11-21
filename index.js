@@ -108,9 +108,7 @@ app.post("/dropDB", async (req, res) => {
 app.get("/data", async (req,res) => {
   try {
     var data = await movieKeyFunctions.getData();
-    res.render('data', {
-        data : JSON.stringify(data)
-    });
+    res.render('data');
   } catch(e) {
     return400(res, "Unexpected error: " + e);
   }
@@ -122,9 +120,33 @@ app.get("/data/:movieKey", async (req,res) => {
     if(data == null) {
       return return400(res, "Movie data for key " + req.params.movieKey + " not found");
     };
-    res.render('data', {
-        data : JSON.stringify(data, null, 2).toString()
+    data.ratings = data.ratings.map(num => Math.round(num * 100) / 100);
+    data.ratingsCount = data.ratingsCount.map(num => Math.round(num * 100) / 100);
+    data.movieHrefs = data.movieHrefs.map(h => h + "\t\n\t");
+    res.render('concreteData', {
+      data
     });
+  } catch(e) {
+    return400(res, "Unexpected error: " + e);
+  }
+});
+
+app.get("/dbData", async (req, res) => {
+  try {
+    var data = await movieKeyFunctions.getData();
+    res.json(data);
+  } catch(e) {
+    return400(res, "Unexpected error: " + e);
+  }
+});
+
+app.get("/dbData/:movieKey", async (req,res) => {
+  try {
+    var data = await movieKeyFunctions.getData(req.params.movieKey);
+    if(data == null) {
+      return return400(res, "Movie data for key " + req.params.movieKey + " not found");
+    };
+    res.json(data);
   } catch(e) {
     return400(res, "Unexpected error: " + e);
   }

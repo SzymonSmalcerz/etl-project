@@ -94,3 +94,7 @@ html, body {
   font-size: 30px;
   display: none;
 }
+
+#movie {
+  font-size: 15px;
+}

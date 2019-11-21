@@ -8,20 +8,32 @@
 </head>
 
 <body>
-    <div class="main-content">
-        {{>header}}
-        <div id="movieData">{{data}}</div>
-        <img class="portrait" src="/img/me.png">
-    </div>
-
-    {{>footer}}
+    <div class="myContainer">
+      {{>header}}
+      <h1>Movie keys in database</h1>
+      <ul id="dynamic-list"></ul>
+      <a href="/csv">Extract csv with all movie data</a>
+      {{>footer}}
+  </div>
 </body>
 <script>
+  function addItemToTheList(value, movieKey) {
+      var ul = document.getElementById("dynamic-list");
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.setAttribute('href', "/data/" + movieKey);
+      li.appendChild(a);
+      li.setAttribute('id', value);
+      a.appendChild(document.createTextNode(value));
+      ul.appendChild(li);
+  }
+
   window.onload = () => {
-    console.log(document.getElementById("movieData").innerHtml)
-    var a = JSON.parse(document.getElementById("movieData").innerText);
-    document.getElementById("movieData").innerText = JSON.stringify(a, null, 2);
-    console.log(JSON.stringify(a, null, 2))
+    $.get("/dbData", (data, status) => {
+      data.forEach(movieKeyData => {
+        addItemToTheList(movieKeyData.key, movieKeyData.key);
+      });
+    });
   };
 </script>
 
