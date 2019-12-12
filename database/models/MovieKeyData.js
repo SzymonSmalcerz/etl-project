@@ -1,42 +1,79 @@
 const mongoose = require('../connection/mongoose');
 
-const movieKeySchema = new mongoose.Schema({
-    key: {
+const keySchema = new mongoose.Schema({
+    key: { // loaded from html in extract step
         type: String,
         required: true,
         trim: true
     },
-    ratings: {
+    ratings: { // loaded from html in extract step
         type: [Number],
         required: true,
         default: []
     },
-    averageRating: {
+    averageRating: { // created in transform step
         type: Number
     },
-    ratingsCount: {
+    ratingsCount: { // loaded from html in extract step
         type: [Number],
         required: true,
         default: []
     },
-    averageRatingsCount: {
+    averageRatingsCount: { // created in transform step
         type: Number
     },
-    years: {
+    years: { // loaded from html in extract step
       type: [Number],
       required : true,
       default: []
     },
-    averageYear: {
+    averageYear: { // created in transform step
       type: Number
     },
-    movieHrefs : {
+    movieHrefs : { // loaded from html in extract step
       type: [String],
       required : true,
       default: []
+    },
+    titles : { // loaded from html in extract step
+      type: [String],
+      required : true,
+      default: []
+    },
+    wantToWatchs: { // loaded from html in extract step
+      type: [Number],
+      required : true,
+      default: []
+    },
+    averageWantToWatch : { // created in transform step
+      type: Number
+    },
+    budgets: { // loaded from html in extract step
+      type: [Number],
+      required : true,
+      default: []
+    },
+    averageBudget : { // created in transform step
+      type: Number
+    },
+    movieLengths: { // loaded from html in extract step
+      type: [Number],
+      required : true,
+      default: []
+    },
+    averageLength : { // created in transform step
+      type: Number
+    },
+    boxOffices: { // loaded from html in extract step
+      type: [Number],
+      required : true,
+      default: []
+    },
+    averageBoxOffice : { // created in transform step
+      type: Number
     }
 });
 
-const MovieKey = mongoose.model('MovieKey', movieKeySchema);
+const MovieKey = mongoose.model('MovieKey', keySchema);
 
 module.exports = MovieKey

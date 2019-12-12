@@ -1,7 +1,5 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
     <title>About</title>
     {{>jsAndCss}}
@@ -10,19 +8,27 @@
 <body>
     <div class="myContainer" id="movie">
       {{>header}}
-      <p>{{data.key}}</p>
-      <p>Ratings: {{data.ratings}}</p>
-      <p style="color:red;">(transformed) Average rating: {{data.averageRating}}</p>
-      <p>Ratings count: {{data.ratingsCount}}</p>
-      <p style="color:red;">(transformed) Average rating count: {{data.averageRatingsCount}}</p>
-      <p>Years: {{data.years}}</p>
-      <p style="color:red;">(transformed) Average year: {{data.averageYear}}</p>
-      <p>Movie hrefs: {{data.movieHrefs}}</p>
-      <a href="/csv/{{data.key}}">Extract csv with movie data</a>
+      <p style = " font-size : 40px">Key: {{data.key}}</p>
+      <br>
+      <p style="color:red;">Average rating: {{data.averageRating}}</p>
+      <p style="color:red;">Average rating count: {{data.averageRatingsCount}}</p>
+      <p style="color:red;">Average entity age: {{data.averageAge}}</p>
+      <p style="color:red;">Average number of people that want to interact with entity: {{data.averageWantToWatch}}</p>
+      <p style="color:red;">Average budget: {{data.averageBudget}}</p>
+      <p style="color:red;">Average length: {{data.averageLength}} minutes</p>
+      <p style="color:red;">Average boxoffice: {{data.averageBoxOffice}}</p>
+      <p>Entitis:</p>
+        {{#each data.fetchedData}}
+        <li><a href="https://www.filmweb.pl{{this.href}}">{{this.title}}</a>,
+          rating: {{this.rating}}, votes: {{this.numOfVotes}}, release year: {{this.year}}</li>
+        {{/each}}
+      <br>
+      <a href="/csv/{{data.key}}" style = "color:green;">Extract csv with movie data</a>
+      <br>
+      <a href="/dropDB/{{data.key}}" rel="nofollow" style = "color : red">Delete data for this key</a>
       {{>footer}}
   </div>
 </body>
 <script>
 </script>
-
 </html>

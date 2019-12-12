@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
     <title>About</title>
     {{>jsAndCss}}
 </head>
-
 <body>
     <div class="myContainer">
       {{>header}}
       <h1>Movie keys in database</h1>
       <ul id="dynamic-list"></ul>
-      <a href="/csv">Extract csv with all movie data</a>
+      <br>
+      <a href="/csv">Extract csv with all keys</a>
+      <br>
+      <a href="/dropDB" rel="nofollow" style = "color : red">Delete data all keys</a>
       {{>footer}}
   </div>
 </body>
@@ -27,8 +27,7 @@
       a.appendChild(document.createTextNode(value));
       ul.appendChild(li);
   }
-
-  window.onload = () => {
+  window.onload = () => { //after loading window fetch data to show
     $.get("/dbData", (data, status) => {
       data.forEach(movieKeyData => {
         addItemToTheList(movieKeyData.key, movieKeyData.key);
@@ -36,5 +35,4 @@
     });
   };
 </script>
-
 </html>

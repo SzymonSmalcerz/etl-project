@@ -1,25 +1,38 @@
 const fs = require('fs')
 const { Parser } = require('json2csv');
-const fields = ['items.key', 'items.averageRating', 'items.averageRatingsCount', 'items.averageYear'];
+const util = require('util');
 
+// make these functions applicable for async/await functionality
+const writeFile = util.promisify(fs.writeFile);
+const unlink = util.promisify(fs.unlink);
+const readFile = util.promisify(fs.readFile);
+// variable used to specify which fields extract to csv file
+const fields = ['items.key', 'items.averageRating',
+                'items.averageRatingsCount', 'items.averageYear'];
+
+// parse json data to csv and save it into the csv file
 const saveToCsv = (data, fileName) => {
-  const json2csvParser = new Parser({ fields, unwind: ['items'], unwindBlank: true });
+  const json2csvParser = new Parser({ fields,
+                          unwind: ['items'], unwindBlank: true });
   const csv = json2csvParser.parse(data);
   fs.writeFileSync( fileName + '.csv', csv);
 };
 
+// fetch csv file from server
 const getCSV = (fileName) => {
   return fs.readFileSync(fileName + '.csv');
 }
 
-const saveData = (data) => {
+// save data to json file, used in extract and transform step
+const saveData = async (data) => {
   const dataJSON = JSON.stringify(data);
-  fs.writeFileSync( data.key + '.json', dataJSON);
+  await writeFile( data.key + '.json', dataJSON);
 };
 
-const loadData = (movieKey) => {
+// load data from json file, used in transform and load step
+const loadData = async (movieKey) => {
     try {
-        const dataBuffer = fs.readFileSync(movieKey + '.json')
+        const dataBuffer = await readFile(movieKey + '.json')
         const dataJSON = dataBuffer.toString()
         return JSON.parse(dataJSON)
     } catch (e) {
@@ -27,8 +40,9 @@ const loadData = (movieKey) => {
     }
 };
 
-const deleteData = (movieKey) => {
-   fs.unlinkSync(movieKey + ".json");
+// delete json file fo particular entityKey
+const deleteData = async (entityKey) => {
+   await unlink(entityKey + ".json");
 };
 
 module.exports = {

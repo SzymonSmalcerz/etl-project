@@ -7,6 +7,14 @@ html, body {
   width: 100%;
 }
 
+li {
+    list-style-type: none;
+}
+
+ul {
+  padding : 0;
+}
+
 .container {
   display: block;
   max-width: 80%;
